@@ -1,7 +1,7 @@
 TARGET   := runme
 CXXFLAGS := -g -Wextra -Wall -std=c++11
 CXX      := g++
-LIBS     := -lGL -lglut -lGLU -lGLEW
+LIBS     := -lglfw3 -lX11 -lXxf86vm -lGL -lGLU -lGLEW -lXrandr -lpthread -lXi
 EXT      := cpp
 
 MAINDIR  := ..
