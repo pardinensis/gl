@@ -83,6 +83,18 @@ void shader::remove(const std::string& name) {
 	}
 }
 
+void shader::remove_all() {
+	while (!shadermap.empty()) {
+		auto& p = shadermap.begin()->second;
+		glDeleteProgram(p.id);
+		for (GLuint shader : p.shaders) {
+			glDetachShader(p.id, shader);
+			glDeleteShader(shader);
+		}
+		shadermap.erase(shadermap.begin());
+	}
+}
+
 GLuint shader::use(const std::string& name) {
 	using namespace shader;
 	auto it = shadermap.find(name);

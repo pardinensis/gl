@@ -23,7 +23,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 		glfwSetWindowShouldClose(window, GL_TRUE);
 }
 
-int main(int argc, char** argv) {
+int main(void) {
 	//init GLFW
 	if (!glfwInit()) {
 		cerr << "cannot initialize glfw" << endl;
@@ -32,7 +32,7 @@ int main(int argc, char** argv) {
 	
 	//print all errors to cerr
 	glfwSetErrorCallback([](int error, const char* desc) {
-		cerr << desc << endl;
+		cerr << "ERROR(" << error << "): " << desc << endl;
 	});
 
 	//create window
@@ -87,6 +87,7 @@ int main(int argc, char** argv) {
 	}
 
 	//clean up
+	shader::remove_all();
 	glfwDestroyWindow(window);
 	glfwTerminate();
 	exit(EXIT_SUCCESS);
