@@ -11,16 +11,29 @@ void display() {
 	GLint loc = glGetUniformLocation(id, "time");
 	glUniform1f(loc, glfwGetTime());
 
-	glBegin(GL_TRIANGLES);
-	glVertex3f(-0.6f, -0.4f, 0.f);
-	glVertex3f(0.6f, -0.4f, 0.f);
-	glVertex3f(0.f, 0.6f, 0.f);
+	glBegin(GL_TRIANGLE_STRIP);
+	glVertex3f(-0.5f, -0.5f, 0.f);
+	glVertex3f(0.5f, -0.5f, 0.f);
+	glVertex3f(-0.5f, 0.5f, 0.f);
+	glVertex3f(0.5f, 0.5f, 0.f);
 	glEnd();
 }
 
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, GL_TRUE);
+}
+
+void count_fps() {
+	static int fps_cntr = 0;
+	static float last_time = 0;
+	float t = glfwGetTime();
+	if (((int)last_time) < ((int)t)) {
+		std::cout << fps_cntr << std::endl;
+		fps_cntr = 0;
+	}
+	++fps_cntr;
+	last_time = t;
 }
 
 int main(void) {
@@ -71,9 +84,11 @@ int main(void) {
 		glfwGetFramebufferSize(window, &width, &height);
 		glViewport(0, 0, width, height);
 		float ratio = width / static_cast<float>(height);
+		
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
 		glOrtho(-ratio, ratio, -1.f, 1.f, 1.f, -1.f);
+		
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
 		glRotatef((float) glfwGetTime() * 50.f, 0.f, 0.f, 1.f);
@@ -84,6 +99,8 @@ int main(void) {
 
 		//handle events
 		glfwPollEvents();
+
+		count_fps();
 	}
 
 	//clean up
