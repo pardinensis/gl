@@ -5,6 +5,7 @@
 #include <glm/glm.hpp>
 
 #include "shader.hpp"
+#include "camera.hpp"
 
 void display() {
 	GLuint id = shader::use("shader");
@@ -57,9 +58,6 @@ int main(void) {
 	}
 	glfwMakeContextCurrent(window);
 
-	//handle user inputs
-	glfwSetKeyCallback(window, key_callback);
-
 	//init GLEW
 	GLenum err = glewInit();
 	if (err != GLEW_OK) {
@@ -72,6 +70,24 @@ int main(void) {
 	shader::create("shader", "shader/vs.glsl", GL_VERTEX_SHADER);
 	shader::create("shader", "shader/fs.glsl", GL_FRAGMENT_SHADER);
 
+	//load camera
+	glm::vec3 pos(1, 1, 1);
+	glm::vec3 dir(0, 0, 0);
+	glm::vec3 up(0, 1, 0);
+	camera::create("cam", pos, dir, up, 90, 0.01, 100);
+	camera::use("cam");
+
+	//initially set the viewport
+	int width, height;
+	glfwGetFramebufferSize(window, &width, &height);
+	camera::set_viewport(width, height);
+
+	//handle user inputs
+	glfwSetKeyCallback(window, key_callback);
+	glfwSetFramebufferSizeCallback(window, [](GLFWwindow*, int w, int h) {
+		camera::set_viewport(w, h);
+	});
+	
 	//run main loop
 	glClearColor(0, 0, 0, 0);
 	glfwSwapInterval(1);
@@ -79,20 +95,6 @@ int main(void) {
 		//clear
 		glClear(GL_COLOR_BUFFER_BIT);
 		
-		//set viewport and camera matrices
-		int width, height;
-		glfwGetFramebufferSize(window, &width, &height);
-		glViewport(0, 0, width, height);
-		float ratio = width / static_cast<float>(height);
-		
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
-		glOrtho(-ratio, ratio, -1.f, 1.f, 1.f, -1.f);
-		
-		glMatrixMode(GL_MODELVIEW);
-		glLoadIdentity();
-		glRotatef((float) glfwGetTime() * 50.f, 0.f, 0.f, 1.f);
-
 		//draw stuff
 		display();
 		glfwSwapBuffers(window);
@@ -100,7 +102,7 @@ int main(void) {
 		//handle events
 		glfwPollEvents();
 
-		count_fps();
+		//count_fps();
 	}
 
 	//clean up
