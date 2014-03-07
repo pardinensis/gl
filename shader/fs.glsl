@@ -4,6 +4,10 @@ in vec3 wpos;
 uniform float time;
 
 void main() {
-	float rand = 0.5+0.5*sin((1000 * time - 1000 * wpos.x + 1000 * cos(wpos.y)) / 100);
-	gl_FragColor = vec4(0, 1-rand, rand, 1);
+	vec3 scaled_wpos = 10 * wpos;
+	float scaled_time = 2 * time;
+
+	float magic = 0.5 + 0.5*sin(scaled_time - sin(scaled_wpos.x) + sin(scaled_wpos.z));
+	float more_magic = 0.5 + 0.5*sin(scaled_time - sin(scaled_wpos.z) + sin(scaled_wpos.x));
+	gl_FragColor = vec4(magic, (1-magic)*more_magic, 1-more_magic, 1);
 }

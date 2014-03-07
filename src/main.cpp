@@ -13,10 +13,10 @@ void display() {
 	glUniform1f(loc, glfwGetTime());
 
 	glBegin(GL_TRIANGLE_STRIP);
-	glVertex3f(-0.5f, -0.5f, 0.f);
-	glVertex3f(0.5f, -0.5f, 0.f);
-	glVertex3f(-0.5f, 0.5f, 0.f);
-	glVertex3f(0.5f, 0.5f, 0.f);
+	glVertex3f(-100.f, 0.f, -100.f);
+	glVertex3f(100.f, 0.f, -100.f);
+	glVertex3f(-100.f, 0.f, 100.f);
+	glVertex3f(100.f, 0.f, 100.f);
 	glEnd();
 }
 
@@ -70,23 +70,29 @@ int main(void) {
 	shader::create("shader", "shader/vs.glsl", GL_VERTEX_SHADER);
 	shader::create("shader", "shader/fs.glsl", GL_FRAGMENT_SHADER);
 
+
+	//handle user inputs
+	glfwSetKeyCallback(window, key_callback);
+	auto resize = [](GLFWwindow*, int width, int height) {
+		camera::set_viewport("cam", 0, 0, width/2, height);
+		camera::set_viewport("cam2", width/2, 0, width/2, height);
+	};
+	glfwSetFramebufferSizeCallback(window, resize);
+
+
 	//load camera
 	glm::vec3 pos(1, 1, 1);
 	glm::vec3 dir(0, 0, 0);
 	glm::vec3 up(0, 1, 0);
 	camera::create("cam", pos, dir, up, 90, 0.01, 100);
+	camera::create("cam2", pos, dir, up, 90, 0.01, 100);
 	camera::use("cam");
 
 	//initially set the viewport
 	int width, height;
 	glfwGetFramebufferSize(window, &width, &height);
-	camera::set_viewport(width, height);
+	resize(window, width, height);
 
-	//handle user inputs
-	glfwSetKeyCallback(window, key_callback);
-	glfwSetFramebufferSizeCallback(window, [](GLFWwindow*, int w, int h) {
-		camera::set_viewport(w, h);
-	});
 	
 	//run main loop
 	glClearColor(0, 0, 0, 0);
@@ -96,6 +102,9 @@ int main(void) {
 		glClear(GL_COLOR_BUFFER_BIT);
 		
 		//draw stuff
+		camera::use("cam");
+		display();
+		camera::use("cam2");
 		display();
 		glfwSwapBuffers(window);
 

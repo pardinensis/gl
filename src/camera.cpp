@@ -11,17 +11,19 @@
 namespace camera {
 	struct cam_info {
 		glm::mat3 lookat;
-		glm::vec4 viewport;
+		glm::vec4 frnf;
 		glm::mat4 proj;
+		glm::vec4 viewport;
 
 		cam_info(glm::vec3& pos, glm::vec3& dir, glm::vec3& up,
 				float fov, float ratio, float near, float far) :
-				lookat(pos, dir, up), viewport(fov, ratio, near, far) {
+				lookat(pos, dir, up), frnf(fov, ratio, near, far) {
 			update_proj();
 		}
 
 		void update_proj() {
-			proj = glm::perspective(viewport[0], viewport[1], viewport[2], viewport[3]);
+			frnf[1] = viewport[2] / viewport[3];
+			proj = glm::perspective(frnf[0], frnf[1], frnf[2], frnf[3]);
 		}
 	};
 
@@ -68,6 +70,7 @@ void camera::use(const std::string& name) {
 	}
 
 	cam_info* cam = it->second;
+	glViewport(cam->viewport[0], cam->viewport[1], cam->viewport[2], cam->viewport[3]);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadMatrixf(glm::value_ptr(glm::lookAt(cam->lookat[0], cam->lookat[1], cam->lookat[2])));
 	glMatrixMode(GL_PROJECTION);
@@ -77,15 +80,38 @@ void camera::use(const std::string& name) {
 	cur_cam = cameramap[name];
 }
 
-void camera::set_viewport(int w, int h) {
-	glViewport(0, 0, w, h);
-	ratio = (float)w / h;
+void camera::set_viewport(int x, int y, int w, int h) {
+	glm::vec4 v(x, y, w, h);
+	set_viewport(v);
+}
 
+void camera::set_viewport(glm::vec4& v) {
 	for (auto& p : cameramap) {
-		p.second->viewport[1] = ratio;
+		p.second->viewport = v;
 		p.second->update_proj();
 	}
-
 	use(cur_cam_name);
 }
 
+void camera::set_viewport(const std::string& name, int x, int y, int w, int h) {
+	glm::vec4 v(x, y, w, h);
+	set_viewport(name, v);
+}
+
+void camera::set_viewport(const std::string& name, glm::vec4& v) {
+	auto it = cameramap.find(name);
+	if (it == cameramap.end()) {
+		throw std::invalid_argument("camera " + name + " not found.");
+	}
+	it->second->viewport = v;
+	it->second->update_proj();
+	use(cur_cam_name);
+}
+
+glm::vec4 camera::get_viewport(const std::string& name) {
+	auto it = cameramap.find(name);
+	if (it == cameramap.end()) {
+		throw std::invalid_argument("camera " + name + " not found.");
+	}
+	return it->second->viewport;
+}
